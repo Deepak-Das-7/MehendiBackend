@@ -3,7 +3,10 @@ import { submitFeedback, getFeedbacks } from "../controllers/feedbackController"
 
 const router = express.Router();
 
-router.post("/", submitFeedback);
-router.get("/", getFeedbacks);
+// Submit feedback for a specific design
+router.post("/:designId", submitFeedback);
+
+// Get all feedbacks for a specific design
+router.get("/:designId", getFeedbacks);
 
 export default router;
