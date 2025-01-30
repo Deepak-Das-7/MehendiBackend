@@ -1,5 +1,5 @@
 import express from "express";
-import { submitFeedback, getFeedbacks } from "../controllers/feedbackController";
+import { submitFeedback, getFeedbacks, getAllFeedbacks } from "../controllers/feedbackController";
 
 const router = express.Router();
 
@@ -8,5 +8,6 @@ router.post("/:designId", submitFeedback);
 
 // Get all feedbacks for a specific design
 router.get("/:designId", getFeedbacks);
+router.get("/", getAllFeedbacks);
 
 export default router;
