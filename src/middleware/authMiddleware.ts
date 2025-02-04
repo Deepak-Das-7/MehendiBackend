@@ -11,10 +11,10 @@ export const protect = (req: Request, res: Response, next: NextFunction): void =
 
   try {
     // Type the decoded token to ensure it has userId
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { _id: string };
 
     // Attach the userId to the request object
-    (req as any).userId = decoded.userId; 
+    (req as any).userId = decoded._id; 
 
     next();
   } catch (error) {

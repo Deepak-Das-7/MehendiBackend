@@ -63,17 +63,18 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       },
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" }
-    );;
+    );
 
     // Respond with the token and user data
     res.json({
-      message: "Login successful",  // Optional success message
+      message: "Login successful",
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        isAdmin: user.isAdmin,
       }
     });
   } catch (error) {
@@ -100,39 +101,60 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// Update User Profile
+
+// Function to update user profile
 export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, phone } = req.body;
+    const { _id, name, email, phone } = req.body;
     const userId = (req as any).userId; // Extracted from the JWT token by the middleware
+
+    console.log(_id,userId);
+
+    // Ensure that the user is not trying to update another user's profile
+    if (_id !== userId) {
+      res.status(403).json({ message: "You cannot update another user's profile" });
+      return; // Ensure no further code is executed after sending the response
+    }
 
     // Validate the new email if provided
     if (email) {
       const emailExists = await User.findOne({ email });
       if (emailExists && emailExists._id.toString() !== userId) {
         res.status(400).json({ message: "Email is already in use by another user" });
-        return;
+        return; // Ensure no further code is executed after sending the response
       }
+    }
+
+    // Prevent a non-admin user from changing their `isAdmin` status
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      res.status(404).json({ message: "User not found" });
+      return; // Ensure no further code is executed after sending the response
     }
 
     // Update user information
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { name, email, phone },
-      { new: true, runValidators: true }
+      { _id, name, email, phone }, // Update all the provided fields
+      { new: true, runValidators: true } // This will return the updated user and apply validations
     );
 
     if (!updatedUser) {
       res.status(404).json({ message: "User not found" });
-      return;
+      return; // Ensure no further code is executed after sending the response
     }
 
-    res.json({ message: "Profile updated successfully", user: updatedUser });
+    // Return the updated user data
+    res.json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error updating profile" });
   }
 };
+
 
 // Delete User Account
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {

@@ -76,6 +76,10 @@ export const getAllFeedbacks = async (req: Request, res: Response): Promise<void
         path: "feedbacks.user", // Populate the user field inside feedbacks array
         select: "name email", // Select only necessary user fields
       })
+      .populate({
+        path: "design", // Populate the design field inside feedbacks array
+        select: "name image", // Select only necessary user fields
+      })
 
     if (!feedbacks.length) {
       res.status(404).json({ message: "No feedbacks found for this design" });
